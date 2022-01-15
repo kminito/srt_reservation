@@ -5,11 +5,12 @@ import validation
 import exceptions
 from random import randint
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
 from datetime import datetime
 
-
+from selenium.common.exceptions import ElementClickInterceptedException
 class SRT:
     def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=None):
         """
@@ -108,9 +109,18 @@ class SRT:
 
                 if "예약하기" in standard_seat:
                     print("예약 가능 클릭")
-                    self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7) > a").click()
-                    self.driver.implicitly_wait(3)
 
+                    # Error handling in case that click does not work
+                    try:
+                        self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7) > a").click()
+                    except ElementClickInterceptedException as err:
+                        print(err)
+                        print("click button doesn't work")
+                        self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7) > a").send_keys(Keys.ENTER)
+                    finally:
+                        self.driver.implicitly_wait(3)
+
+                    # 예약이 성공하면
                     if self.driver.find_elements(By.ID, 'isFalseGotoMain'):
                         is_booked = True
                         print("예약 성공")
@@ -150,4 +160,3 @@ if __name__ == "__main__":
     srt.login(srt_id, srt_psw)
     srt.go_search()
     srt.refresh_search_result()
-
