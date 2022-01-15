@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
 import time
+import validation
+import exceptions
 from random import randint
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
+from datetime import datetime
 
-
-station_list = ["수서", "동탄", "평택지제", "천안아산", "오송", "대전", "김천(구미)", "동대구",
-                "신경주", "울산(통도사)", "부산", "공주", "익산", "정읍", "광주송정", "나주", "목포"]
 
 class SRT:
     def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=None):
@@ -35,9 +35,19 @@ class SRT:
         self.is_booked = False  # 예약 완료 되었는지 확인용
         self.cnt_refresh = 0  # 새로고침 회수 기록
 
-    def check_inpit(self):
-        pass
-        # TODO: input format validation
+        self.check_input()
+
+    def check_input(self):
+        if self.dpt_stn not in validation.station_list:
+            raise exceptions.InvalidStationNameError("출발역 입력이 잘못되었습니다.")
+        if self.arr_stn not in validation.station_list:
+            raise exceptions.InvalidStationNameError("도착역 입력이 잘못되었습니다.")
+        if not str(self.dpt_dt).isnumeric():
+            raise exceptions.InvalidDateFormatError("날짜는 숫자로만 이루어져야 합니다.")
+        try:
+            datetime.strptime(str(self.dpt_dt), '%Y%m%d')
+        except ValueError:
+            raise exceptions.InvalidDateError("날짜가 잘못 되었습니다. YYYYMMDD 형식으로 입력해주세요.")
 
     def set_driver(self):
         # TODO: Exception Handling
@@ -55,7 +65,7 @@ class SRT:
         self.driver.implicitly_wait(5)
         return self.driver
 
-    def goto_search_page(self):
+    def go_search(self):
 
         # 기차 조회 페이지로 이동
         self.driver.get('https://etk.srail.kr/hpg/hra/01/selectScheduleList.do')
@@ -90,7 +100,6 @@ class SRT:
         self.driver.implicitly_wait(5)
         time.sleep(1)
 
-
     def refresh_search_result(self):
         while True:
             for i in range(1, self.num_trains_to_check+1):
@@ -105,7 +114,7 @@ class SRT:
                     if self.driver.find_elements(By.ID, 'isFalseGotoMain'):
                         is_booked = True
                         print("예약 성공")
-                        break
+                        return self.driver
                     else:
                         print("잔여석 없음. 다시 검색")
                         self.driver.back()  # 뒤로가기
@@ -116,10 +125,10 @@ class SRT:
                         print("예약 대기 완료")
                         self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(8) > a").click()
                         is_booked = True
-                        break
+                        return self.driver
 
             if not self.is_booked:
-                time.sleep(randint(2, 4))  #2~4초 랜덤으로 기다리기
+                time.sleep(randint(2, 4))  # 2~4초 랜덤으로 기다리기
 
                 # 다시 조회하기
                 submit = self.driver.find_element(By.XPATH, "//input[@value='조회하기']")
@@ -129,8 +138,7 @@ class SRT:
                 self.driver.implicitly_wait(10)
                 time.sleep(0.5)
             else:
-                break
-        return self.driver
+                return self.driver
 
 
 if __name__ == "__main__":
@@ -140,6 +148,6 @@ if __name__ == "__main__":
     srt = SRT("동탄", "동대구", "20220116", "08")
     srt.set_driver()
     srt.login(srt_id, srt_psw)
-    srt.goto_search_page()
+    srt.go_search()
     srt.refresh_search_result()
 

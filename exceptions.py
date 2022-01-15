@@ -1,9 +1,12 @@
-class InvalidStation(Exception):
+class InvalidStationNameError(Exception):
     pass
 
-class InvalidDepartureDateFormat(Exception):
+class InvalidDateFormatError(Exception):
     pass
 
-class InvalidDepartureTimeFormat(Exception):
+class InvalidDateError(Exception):
+    pass
+
+class InvalidTimeFormatError(Exception):
     pass
 
