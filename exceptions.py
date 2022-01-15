@@ -1,3 +1,5 @@
+from validation import station_list
+
 class InvalidStationNameError(Exception):
     pass
 
