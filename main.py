@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-import validation
 import exceptions
 from random import randint
+from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
-from datetime import datetime
-
 from selenium.common.exceptions import ElementClickInterceptedException
+from validation import station_list
+
+
 class SRT:
     def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=False):
         """
@@ -39,10 +40,10 @@ class SRT:
         self.check_input()
 
     def check_input(self):
-        if self.dpt_stn not in validation.station_list:
-            raise exceptions.InvalidStationNameError("출발역 입력이 잘못되었습니다.")
-        if self.arr_stn not in validation.station_list:
-            raise exceptions.InvalidStationNameError("도착역 입력이 잘못되었습니다.")
+        if self.dpt_stn not in station_list:
+            raise exceptions.InvalidStationNameError(f"출발역 오류. '{self.dpt_stn}' 은/는 목록에 없습니다.")
+        if self.arr_stn not in station_list:
+            raise exceptions.InvalidStationNameError(f"도착역 오류. '{self.arr_stn}' 은/는 목록에 없습니다.")
         if not str(self.dpt_dt).isnumeric():
             raise exceptions.InvalidDateFormatError("날짜는 숫자로만 이루어져야 합니다.")
         try:
