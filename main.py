@@ -12,7 +12,7 @@ from datetime import datetime
 
 from selenium.common.exceptions import ElementClickInterceptedException
 class SRT:
-    def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=None):
+    def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=False):
         """
         :param dpt_stn: SRT 출발역
         :param arr_stn: SRT 도착역
@@ -50,18 +50,19 @@ class SRT:
         except ValueError:
             raise exceptions.InvalidDateError("날짜가 잘못 되었습니다. YYYYMMDD 형식으로 입력해주세요.")
 
-    def set_driver(self):
-        # TODO: Exception Handling
-        self.driver = webdriver.Chrome("chromedriver")
-
-    def login(self, login_id, login_psw):
+    def set_log_info(self, login_id, login_psw):
         self.login_id = login_id
         self.login_psw = login_psw
 
+    def run_driver(self):
+        # TODO: Exception Handling
+        self.driver = webdriver.Chrome("chromedriver")
+
+    def login(self):
         self.driver.get('https://etk.srail.co.kr/cmc/01/selectLoginForm.do')
         self.driver.implicitly_wait(15)
-        self.driver.find_element(By.ID, 'srchDvNm01').send_keys(str(login_id))
-        self.driver.find_element(By.ID, 'hmpgPwdCphd01').send_keys(str(login_psw))
+        self.driver.find_element(By.ID, 'srchDvNm01').send_keys(str(self.login_id))
+        self.driver.find_element(By.ID, 'hmpgPwdCphd01').send_keys(str(self.login_psw))
         self.driver.find_element(By.XPATH, '//*[@id="login-form"]/fieldset/div[1]/div[1]/div[2]/div/div[2]/input').click()
         self.driver.implicitly_wait(5)
         return self.driver
@@ -150,13 +151,17 @@ class SRT:
             else:
                 return self.driver
 
+    def quickstart(self, login_id, login_psw):
+        self.run_driver()
+        self.set_log_info(login_id, login_psw)
+        self.login()
+        self.go_search()
+        self.refresh_search_result()
+
 
 if __name__ == "__main__":
     srt_id = os.environ.get('srt_id')
     srt_psw = os.environ.get('srt_psw')
 
-    srt = SRT("동탄", "동대구", "20220116", "08")
-    srt.set_driver()
-    srt.login(srt_id, srt_psw)
-    srt.go_search()
-    srt.refresh_search_result()
+    srt = SRT("동탄", "동대구", "20220117", "08")
+    srt.quickstart(srt_id, srt_psw)
