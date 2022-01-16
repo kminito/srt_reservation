@@ -10,7 +10,7 @@
 - 파이썬 3.7에서만 테스트 진행함
 
 ```py
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
 
 
