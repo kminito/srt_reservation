@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-
 from random import randint
 from datetime import datetime
 from selenium import webdriver
@@ -12,6 +11,8 @@ from selenium.common.exceptions import ElementClickInterceptedException, StaleEl
 
 from srt_reservation.exceptions import InvalidStationNameError, InvalidDateError, InvalidDateFormatError, InvalidTimeFormatError
 from srt_reservation.validation import station_list
+
+chromedriver_path = r'C:\workspace\chromedriver.exe'
 
 
 class SRT:
@@ -37,7 +38,6 @@ class SRT:
 
         self.driver = None
 
-        self.chromedriver_path = r'C:\workspace\chromedriver.exe'
         self.is_booked = False  # 예약 완료 되었는지 확인용
         self.cnt_refresh = 0  # 새로고침 회수 기록
 
@@ -61,7 +61,7 @@ class SRT:
 
     def run_driver(self):
         # TODO: Exception Handling
-        self.driver = webdriver.Chrome(executable_path=self.chromedriver_path)
+        self.driver = webdriver.Chrome(executable_path=chromedriver_path)
 
     def login(self):
         self.driver.get('https://etk.srail.co.kr/cmc/01/selectLoginForm.do')

@@ -7,7 +7,7 @@
   
 ## 필요
 - 파이썬 3.7에서만 테스트 진행함
-- Chromedriver -> srt_reservation/main.py에서 별도 경로 설정 필요 (업데이트 예정)
+- Chromedriver -> srt_reservation/main.py에서 별도 경로 설정 필요
 - Selenium
 
 ## Arguments
