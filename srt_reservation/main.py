@@ -170,7 +170,7 @@ class SRT:
             else:
                 return self.driver
 
-    def quickstart(self, login_id, login_psw):
+    def run(self, login_id, login_psw):
         self.run_driver()
         self.set_log_info(login_id, login_psw)
         self.login()
@@ -183,4 +183,4 @@ if __name__ == "__main__":
     srt_psw = os.environ.get('srt_psw')
 
     srt = SRT("동탄", "동대구", "20220117", "08")
-    srt.quickstart(srt_id, srt_psw)
+    srt.run(srt_id, srt_psw)
