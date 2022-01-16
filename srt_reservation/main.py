@@ -4,14 +4,16 @@ import time
 from random import randint
 from datetime import datetime
 from selenium import webdriver
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
-from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException, WebDriverException
 
 from srt_reservation.exceptions import InvalidStationNameError, InvalidDateError, InvalidDateFormatError, InvalidTimeFormatError
 from srt_reservation.validation import station_list
 
+# Chromedriver 없을 시 처음에는 자동으로 설치합니다.
 chromedriver_path = r'C:\workspace\chromedriver.exe'
 
 
@@ -35,7 +37,6 @@ class SRT:
 
         self.num_trains_to_check = num_trains_to_check
         self.want_reserve = want_reserve
-
         self.driver = None
 
         self.is_booked = False  # 예약 완료 되었는지 확인용
@@ -60,8 +61,11 @@ class SRT:
         self.login_psw = login_psw
 
     def run_driver(self):
-        # TODO: Exception Handling
-        self.driver = webdriver.Chrome(executable_path=chromedriver_path)
+        try:
+            self.driver = webdriver.Chrome(executable_path=chromedriver_path)
+        except WebDriverException:
+            self.driver = webdriver.Chrome(ChromeDriverManager().install())
+
 
     def login(self):
         self.driver.get('https://etk.srail.co.kr/cmc/01/selectLoginForm.do')
@@ -135,7 +139,6 @@ class SRT:
                         self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7) > a").click()
                     except ElementClickInterceptedException as err:
                         print(err)
-                        print("click button doesn't work")
                         self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7) > a").send_keys(Keys.ENTER)
                     finally:
                         self.driver.implicitly_wait(3)
@@ -178,9 +181,9 @@ class SRT:
         self.refresh_search_result()
 
 
-if __name__ == "__main__":
-    srt_id = os.environ.get('srt_id')
-    srt_psw = os.environ.get('srt_psw')
-
-    srt = SRT("동탄", "동대구", "20220117", "08")
-    srt.run(srt_id, srt_psw)
+# if __name__ == "__main__":
+#     srt_id = os.environ.get('srt_id')
+#     srt_psw = os.environ.get('srt_psw')
+#
+#     srt = SRT("동탄", "동대구", "20220119", "08")
+#     srt.run(srt_id, srt_psw)
