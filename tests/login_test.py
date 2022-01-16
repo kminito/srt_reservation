@@ -5,6 +5,7 @@ from srt_reservation import main, exceptions, validation
 srt_id = os.environ.get('srt_id')
 srt_psw = os.environ.get('srt_psw')
 
+
 class SRTTestCase(unittest.TestCase):
     def setUp(self):
         self.srt = main.SRT("동탄", "동대구", "20220118", "08")
