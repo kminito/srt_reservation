@@ -6,12 +6,15 @@
 
   
 ## 필요
+- Google Chrome Browser (첫 실행시 Chromedriver 자동 설치)
 - 파이썬 3.7에서만 테스트 진행함
-- Chromedriver -> srt_reservation/main.py에서 별도 경로 설정 필요
-- Selenium
 
-## Arguments
+```py
+pip install -r requirement.txt
+```
 
+
+## Variables
     dpt_stn: SRT 출발역
     arr_stn: SRT 도착역
     dpt_dt: 출발 날짜 YYYYMMDD 형태 ex) 20220115
@@ -25,41 +28,14 @@
 
 ## Quick Start
 
-```cmd
-python quickstart.py --user 아이디 --psw 비밀번호 --dpt 동탄 --arr 동대구 --dt 20220118 --tm 08
-```
-
-
-
-
-## 예제
-
-**Example 1)**  
+회원번호 1234567890  
+비밀번호 000000  
 동탄 -> 동대구, 2022년 01월 17일 오전 8시 이후 기차  
 검색 결과 중 상위 2개가 예약 가능할 경우 예약
 
-- srt_id는 SRT 홈페이지 로그인시 사용하는 회원 번호(10자리)입니다.
-
-```py
-if __name__ == "__main__":
-    srt_id = os.environ.get('srt_id')
-    srt_psw = os.environ.get('srt_psw')
-
-    srt = SRT("동탄", "동대구", "20220117", "08")
-    srt.run(srt_id, srt_psw)
-```  
-  
-  
-  
-**Example 2)**  
-예약 대기 버튼 사용  
-검색 결과 중 상위 3개 예약 가능 여부 확인  
-```python
-srt = SRT("동탄", "동대구", "20220117", "08", num_trains_to_check=3, want_reserve=False)
-srt.run(srt_id, srt_psw)
+```cmd
+python quickstart.py --user 1234567890 --psw 000000 --dpt 동탄 --arr 동대구 --dt 20220117 --tm 08
 ```
-- 예약 대기란? : 예약대기는 해당 열차가 출발하기 3일 전까지 매일 접수하여 다음날 오전9시 취소표를 배정하며, 출발 2일 전부터는 접수하지 않음  
-
 
 
 **실행 결과**
