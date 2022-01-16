@@ -4,10 +4,15 @@
 매진된 SRT 표의 예매를 도와주는 파이썬 프로그램입니다.  
 원하는 표가 나올 때 까지 새로고침하여 예약을 시도합니다.
 
+
+## 다운
+```cmd
+git clone https://github.com/kminito/srt_reservation.git
+```
   
 ## 필요
-- Google Chrome Browser (첫 실행시 Chromedriver 자동 설치)
-- 파이썬 3.7에서만 테스트 진행함
+- Google Chrome Browser (Chromedriver 자동 설치)
+- 파이썬 3.7에서만 테스트 진행
 
 ```py
 pip install -r requirements.txt
@@ -27,7 +32,7 @@ pip install -r requirements.txt
 
 
 
-## Quick Start
+## 간단 사용법
 
 회원번호 1234567890  
 비밀번호 000000  
