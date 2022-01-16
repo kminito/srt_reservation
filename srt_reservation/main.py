@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 import os
 import time
-import exceptions
+
 from random import randint
 from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.select import Select
-from selenium.common.exceptions import ElementClickInterceptedException
-from validation import station_list
+from selenium.common.exceptions import ElementClickInterceptedException, StaleElementReferenceException
+
+from srt_reservation.exceptions import InvalidStationNameError, InvalidDateError, InvalidDateFormatError, InvalidTimeFormatError
+from srt_reservation.validation import station_list
 
 
 class SRT:
@@ -43,15 +45,15 @@ class SRT:
 
     def check_input(self):
         if self.dpt_stn not in station_list:
-            raise exceptions.InvalidStationNameError(f"출발역 오류. '{self.dpt_stn}' 은/는 목록에 없습니다.")
+            raise InvalidStationNameError(f"출발역 오류. '{self.dpt_stn}' 은/는 목록에 없습니다.")
         if self.arr_stn not in station_list:
-            raise exceptions.InvalidStationNameError(f"도착역 오류. '{self.arr_stn}' 은/는 목록에 없습니다.")
+            raise InvalidStationNameError(f"도착역 오류. '{self.arr_stn}' 은/는 목록에 없습니다.")
         if not str(self.dpt_dt).isnumeric():
-            raise exceptions.InvalidDateFormatError("날짜는 숫자로만 이루어져야 합니다.")
+            raise InvalidDateFormatError("날짜는 숫자로만 이루어져야 합니다.")
         try:
             datetime.strptime(str(self.dpt_dt), '%Y%m%d')
         except ValueError:
-            raise exceptions.InvalidDateError("날짜가 잘못 되었습니다. YYYYMMDD 형식으로 입력해주세요.")
+            raise InvalidDateError("날짜가 잘못 되었습니다. YYYYMMDD 형식으로 입력해주세요.")
 
     def set_log_info(self, login_id, login_psw):
         self.login_id = login_id
@@ -70,6 +72,15 @@ class SRT:
         self.driver.find_element(By.XPATH, '//*[@id="login-form"]/fieldset/div[1]/div[1]/div[2]/div/div[2]/input').click()
         self.driver.implicitly_wait(5)
         return self.driver
+
+    def check_login(self):
+        menu_text = self.driver.find_element(By.CSS_SELECTOR, "#wrap > div.header.header-e > div.global.clear > div").text
+        if "환영합니다" in menu_text:
+            return True
+        else:
+            return False
+
+
 
     def go_search(self):
 
@@ -109,8 +120,12 @@ class SRT:
     def refresh_search_result(self):
         while True:
             for i in range(1, self.num_trains_to_check+1):
-                standard_seat = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7)").text
-                reservation = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(8)").text
+                try:
+                    standard_seat = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7)").text
+                    reservation = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(8)").text
+                except StaleElementReferenceException:
+                    standard_seat = "매진"
+                    reservation = "매진"
 
                 if "예약하기" in standard_seat:
                     print("예약 가능 클릭")
