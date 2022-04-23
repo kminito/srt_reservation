@@ -11,8 +11,7 @@ git clone https://github.com/kminito/srt_reservation.git
 ```
   
 ## 필요
-- Google Chrome Browser (Chromedriver 자동 설치)
-- 파이썬 3.7에서만 테스트 진행
+- 파이썬 3.7, 3.9에서 테스트 했습니다.
 
 ```py
 pip install -r requirements.txt
@@ -54,4 +53,4 @@ python quickstart.py --user 1234567890 --psw 000000 --dpt 동탄 --arr 동대구
 ![](./img/img1.png)
 
 ## 기타  
-명절 승차권 예약에는 사용이 불가합니다.
+명절 승차권 예약에는 사용이 불가합니다.  
