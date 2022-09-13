@@ -13,9 +13,7 @@ from selenium.common.exceptions import ElementClickInterceptedException, StaleEl
 from srt_reservation.exceptions import InvalidStationNameError, InvalidDateError, InvalidDateFormatError, InvalidTimeFormatError
 from srt_reservation.validation import station_list
 
-# Chromedriver 없을 시 처음에는 자동으로 설치합니다.
 chromedriver_path = r'C:\workspace\chromedriver.exe'
-
 
 class SRT:
     def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=False):
@@ -157,7 +155,7 @@ class SRT:
             self.driver.find_element(By.CSS_SELECTOR,
                                      f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(8) > a").click()
             self.is_booked = True
-            return self.driver
+            return self.is_booked
 
     def check_result(self):
         while True:
@@ -169,12 +167,15 @@ class SRT:
                     standard_seat = "매진"
                     reservation = "매진"
 
-                self.book_ticket(standard_seat, i)
+                if self.book_ticket(standard_seat, i):
+                    return self.driver
+
                 if self.want_reserve:
                     self.reserve_ticket(reservation, i)
 
             if self.is_booked:
                 return self.driver
+
             else:
                 time.sleep(randint(2, 4))
                 self.refresh_result()
