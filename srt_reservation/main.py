@@ -13,16 +13,19 @@ from selenium.common.exceptions import ElementClickInterceptedException, StaleEl
 from srt_reservation.exceptions import InvalidStationNameError, InvalidDateError, InvalidDateFormatError, InvalidTimeFormatError
 from srt_reservation.validation import station_list
 
-chromedriver_path = r'C:\workspace\chromedriver.exe'
+import winsound
+import keyboard
+from time import sleep
 
 class SRT:
-    def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, num_trains_to_check=2, want_reserve=False):
+    def __init__(self, dpt_stn, arr_stn, dpt_dt, dpt_tm, start_num_trains_to_check=1, end_num_trains_to_check=2, want_reserve=False):
         """
         :param dpt_stn: SRT 출발역
         :param arr_stn: SRT 도착역
         :param dpt_dt: 출발 날짜 YYYYMMDD 형태 ex) 20220115
         :param dpt_tm: 출발 시간 hh 형태, 반드시 짝수 ex) 06, 08, 14, ...
-        :param num_trains_to_check: 검색 결과 중 예약 가능 여부 확인할 기차의 수 ex) 2일 경우 상위 2개 확인
+        :param start_num_trains_to_check: 검색 결과 중 예약 가능 여부 확인할 기차의 start index ex) 조회결과 중 start번째 부터 end번째까지만 확인
+        :param end_num_trains_to_check: 검색 결과 중 예약 가능 여부 확인할 기차의 end index
         :param want_reserve: 예약 대기가 가능할 경우 선택 여부
         """
         self.login_id = None
@@ -33,7 +36,8 @@ class SRT:
         self.dpt_dt = dpt_dt
         self.dpt_tm = dpt_tm
 
-        self.num_trains_to_check = num_trains_to_check
+        self.start_num_trains_to_check = start_num_trains_to_check
+        self.end_num_trains_to_check = end_num_trains_to_check
         self.want_reserve = want_reserve
         self.driver = None
 
@@ -60,7 +64,7 @@ class SRT:
 
     def run_driver(self):
         try:
-            self.driver = webdriver.Chrome(executable_path=chromedriver_path)
+            self.driver = webdriver.Chrome()
         except WebDriverException:
             self.driver = webdriver.Chrome(ChromeDriverManager().install())
 
@@ -106,7 +110,7 @@ class SRT:
         Select(self.driver.find_element(By.ID, "dptTm")).select_by_visible_text(self.dpt_tm)
 
         print("기차를 조회합니다")
-        print(f"출발역:{self.dpt_stn} , 도착역:{self.arr_stn}\n날짜:{self.dpt_dt}, 시간: {self.dpt_tm}시 이후\n{self.num_trains_to_check}개의 기차 중 예약")
+        print(f"출발역:{self.dpt_stn} , 도착역:{self.arr_stn}\n날짜:{self.dpt_dt}, 시간: {self.dpt_tm}시 이후\n{self.start_num_trains_to_check}번째 부터 {self.end_num_trains_to_check}번째 까지의 기차 중 예약")
         print(f"예약 대기 사용: {self.want_reserve}")
 
         self.driver.find_element(By.XPATH, "//input[@value='조회하기']").click()
@@ -134,7 +138,11 @@ class SRT:
             # 예약이 성공하면
             if self.driver.find_elements(By.ID, 'isFalseGotoMain'):
                 self.is_booked = True
-                print("예약 성공")
+                print("예약 성공\nESC키를 꾹 눌러 종료합니다.")
+                while True:
+                    if keyboard.is_pressed("esc"):
+                        break
+                    winsound.PlaySound("SystemHand", winsound.SND_ALIAS)
                 return self.driver
             else:
                 print("잔여석 없음. 다시 검색")
@@ -159,7 +167,7 @@ class SRT:
 
     def check_result(self):
         while True:
-            for i in range(1, self.num_trains_to_check+1):
+            for i in range(self.start_num_trains_to_check, self.end_num_trains_to_check+1):
                 try:
                     standard_seat = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(7)").text
                     reservation = self.driver.find_element(By.CSS_SELECTOR, f"#result-form > fieldset > div.tbl_wrap.th_thead > table > tbody > tr:nth-child({i}) > td:nth-child(8)").text
